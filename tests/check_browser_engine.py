@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'tests'))
 from backtester.engine import run
+from backtester.data import csv_columns, guess_mapping, parse_csv
 from backtester.strategy import templates
 from test_backtester import bars, flat, settings_strategy, simple_block
 
@@ -30,7 +31,38 @@ def check_close(expected, actual, path='result'):
         assert expected == actual, (path, expected, actual)
 
 
+def check_csv_headers():
+    texts=[
+        '日期,時間,開盤價,最高價,最低價,收盤價,備註,備註,,\n2024/2/1,08:45,100,110,90,102,first,second,,',
+        'datetime,open,high,low,close,open\n2024-02-01 08:45,100,110,90,102,105',
+        '日期,日期,時間,open,high,low,close\n2024/2/1,2024/2/2,08:45,100,110,90,102',
+        'datetime,open,high,low,close,open,open [第 2 欄]\n2024-02-01 08:45,100,110,90,102,105,107',
+    ]
+    fixtures=[]
+    for text in texts:
+        original=text.split('\n')[0].split(',');columns=csv_columns(original)
+        guessed=guess_mapping([c['key'] for c in columns],original)
+        mappings=[None]
+        if guessed['open']=='':
+            mappings += [{**guessed,'open':c['key']} for c in columns if c['name']=='open']
+        if guessed['datetime']=='':mappings.append({**guessed,'datetime':columns[0]['key']})
+        for mapping in mappings:
+            bars,report=parse_csv(text.encode(),mapping)
+            fixtures.append({'text':text,'mapping':mapping,'expected':{'columns':columns,'guessed':guessed,'error':bool(report['errors']),
+                'bars':[[b.start.isoformat(),b.open,b.high,b.low,b.close,b.volume] for b in bars]}})
+    source="""
+const fs=require('fs'),vm=require('vm');
+vm.runInThisContext(fs.readFileSync('static/csv.js','utf8'));
+const fixtures=JSON.parse(fs.readFileSync(0,'utf8'));
+console.log(JSON.stringify(fixtures.map(f=>{const columns=NakedCSV.columns(f.text),r=NakedCSV.parse(f.text,f.mapping);return {columns,guessed:NakedCSV.guess(columns.map(c=>c.key),columns.map(c=>c.name)),error:r.report.errors.length>0,bars:r.bars.map(b=>[NakedCSV.iso(b.start),b.open,b.high,b.low,b.close,b.volume])};})));
+"""
+    output=subprocess.run(['node','-e',source],input=json.dumps(fixtures,ensure_ascii=False),capture_output=True,text=True,cwd=ROOT,check=True)
+    for i,(fixture,actual) in enumerate(zip(fixtures,json.loads(output.stdout))):check_close(fixture['expected'],actual,f'csv[{i}]')
+    print(f'PASS: {len(fixtures)} Python / JavaScript CSV comparisons (blank/duplicate/colliding headers, explicit column choices, ambiguous dates)')
+
+
 def main():
+    check_csv_headers()
     fixtures = []
     samples = [flat(5) + [(100,105,99,104),(104,130,90,104),(105,106,104,105)],
                flat(20) + [(100,106,99,105),(105,106,104,105),(105,106,101,103),(103,105,102,104),(104,105,103,104)],

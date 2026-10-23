@@ -1,6 +1,7 @@
 /* CSV decoding and validation shared by the server UI and standalone worker. */
 (function(scope){
   'use strict';
+  const PARSER_VERSION='1.1.0';
   const aliases={datetime:['datetime','timestamp','date time','日期時間','日期時間戳記','時間戳記','交易時間','時間'],date:['date','日期','交易日期'],time:['time','時間','交易時刻'],open:['open','開盤','開盤價'],high:['high','最高','最高價'],low:['low','最低','最低價'],close:['close','收盤','收盤價'],volume:['volume','vol','成交量','交易量','總成交量'],contract:['contract','symbol','合約','商品合約','合約月份','契約'],source:['source','資料來源','來源']};
   const normalize=s=>String(s).trim().toLowerCase().replace(/[\s_\-()（）]/g,'');
   function decode(buffer, encoding='auto') {
@@ -31,11 +32,17 @@
     if(quoted)throw Error('CSV 有未閉合的雙引號');
     row.push(field);if(row.some(x=>x!==''))yield row;
   }
-  function headers(text){return rows(text).next().value||[];}
-  function guess(headers){
-    const find=key=>headers.find(h=>aliases[key].some(a=>normalize(a)===normalize(h)))||'';
-    const date=find('date'),stamp=find('datetime');
-    const mapping={datetime:date||stamp,time:date?find('time'):'',open:find('open'),high:find('high'),low:find('low'),close:find('close'),volume:find('volume'),contract:find('contract'),source:find('source')};
+  function columnKeys(names){
+    const counts=new Map(),reserved=new Set(names),used=new Set();for(const name of names)counts.set(name,(counts.get(name)||0)+1);
+    return names.map((name,index)=>{const renamed=!name.trim()||counts.get(name)>1;let key=renamed?`${name.trim()?name:'未命名欄位'} [第 ${index+1} 欄]`:name;if(renamed)while(reserved.has(key)||used.has(key))key+='#';used.add(key);return {key,name,column:index+1,renamed};});
+  }
+  function columns(text){return columnKeys(rows(text).next().value||[]);}
+  function headers(text){return columns(text).map(c=>c.key);}
+  function guess(headers,originals=headers){
+    const matches=key=>headers.filter((h,i)=>aliases[key].some(a=>normalize(a)===normalize(originals[i])));
+    const find=key=>{const candidates=matches(key);return candidates.length===1?candidates[0]:'';};
+    const hasDate=matches('date').length>0;
+    const mapping={datetime:hasDate?find('date'):find('datetime'),time:hasDate?find('time'):'',open:find('open'),high:find('high'),low:find('low'),close:find('close'),volume:find('volume'),contract:find('contract'),source:find('source')};
     return mapping;
   }
   function timestamp(value,timeValue=''){
@@ -63,13 +70,13 @@
   const day=ms=>{const d=new Date(ms+480*60000);return d.getUTCDay()>0&&d.getUTCDay()<6&&clock(ms)>='08:45'&&clock(ms)<'13:45';};
   function number(raw){const text=String(raw??'').trim();if(text.includes(',')&&!/^[+-]?\d{1,3}(?:,\d{3})+(?:\.\d*)?(?:[eE][+-]?\d+)?$/.test(text))return NaN;const cleaned=text.replace(/,/g,'');return /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(cleaned)?Number(cleaned):NaN;}
   function parse(text,mapping){
-    const iterator=rows(text),head=iterator.next().value||[];mapping=mapping||guess(head);
-    const report={errors:[],warnings:[],missing_minutes:[],night_rows:0,outside_session_rows:0,volume_missing_rows:0,rows:0};
+    const iterator=rows(text),originals=iterator.next().value||[],cols=columnKeys(originals),head=cols.map(c=>c.key);mapping=mapping||guess(head,originals);
+    const report={parser_version:PARSER_VERSION,errors:[],warnings:[],missing_minutes:[],night_rows:0,outside_session_rows:0,volume_missing_rows:0,rows:0};
+    report.columns=cols;if(cols.some(c=>c.renamed))report.warnings.push('重複或空白欄名已按原始欄位位置區分；同名必要欄位請手動對應，不需修改 CSV');
     const required=['datetime','open','high','low','close'];
     const absent=required.filter(k=>!mapping[k]||!head.includes(mapping[k]));
     if(absent.length){report.errors.push('請對應必要欄位：'+absent.join('、'));return {bars:[],report};}
     if(new Set(required.map(k=>mapping[k])).size!==required.length){report.errors.push('日期與 OHLC 必須對應不同欄位');return {bars:[],report};}
-    if(new Set(head).size!==head.length){report.errors.push('CSV 欄位名稱重複，請先調整欄名');return {bars:[],report};}
     const idx=Object.fromEntries(Object.entries(mapping).map(([k,v])=>[k,head.indexOf(v)]));
     const bars=[],seen=new Set(),daily=new Map();let previous=null,line=1;
     for(const row of iterator){line++;report.rows++;
@@ -95,5 +102,5 @@
     if(!bars.length)report.errors.push('CSV 沒有行情資料');
     return {bars,report};
   }
-  scope.NakedCSV={decode,delimiter,rows,headers,guess,timestamp,iso,date,clock,day,parse};
+  scope.NakedCSV={PARSER_VERSION,decode,delimiter,rows,columns,headers,guess,timestamp,iso,date,clock,day,parse};
 })(typeof self!=='undefined'?self:globalThis);

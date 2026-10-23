@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = '1.2'
+RELEASE = '1.3'
 sys.path.insert(0, str(ROOT))
 from backtester.strategy import templates
 

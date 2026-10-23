@@ -92,14 +92,14 @@ async function prepareCSV(){
   try{
   const buffer=await file.arrayBuffer();if(generation!==csvGeneration)return;
   const decoded=NakedCSV.decode(buffer,$('encoding').value);csvText=decoded.text;detectedEncoding=decoded.encoding;
-  const headers=NakedCSV.headers(csvText),guessed=NakedCSV.guess(headers),labels={datetime:'日期／完整時間',time:'獨立時間（選填）',open:'開盤價',high:'最高價',low:'最低價',close:'收盤價',volume:'成交量（選填）'};
+  const columns=NakedCSV.columns(csvText),headers=columns.map(c=>c.key),guessed=NakedCSV.guess(headers,columns.map(c=>c.name)),labels={datetime:'日期／完整時間',time:'獨立時間（選填）',open:'開盤價',high:'最高價',low:'最低價',close:'收盤價',volume:'成交量（選填）'};
   $('file-label').textContent=file.name;$('mapping').hidden=false;$('import').hidden=false;
   $('mapping').innerHTML='<div class="field-grid">'+Object.entries(labels).map(([k,label])=>`<label>${label} · ${k}<select data-map="${k}">${option('',k==='time'?'已包含在日期欄':k==='volume'?'不使用成交量':'請選擇欄位',guessed[k])}${headers.map(h=>option(h,h,guessed[k])).join('')}</select></label>`).join('')+'</div>';
   $('mapping').querySelectorAll('select').forEach(el=>el.onchange=()=>{$('dataset').value='';});
   const examples=[];let count=0;for(const row of NakedCSV.rows(csvText)){if(count++===0)continue;examples.push(row);if(examples.length===3)break;}
   $('csv-preview').innerHTML='<table><caption>解碼後前 3 筆資料</caption><thead><tr>'+headers.map(h=>`<th>${esc(h)}</th>`).join('')+'</tr></thead><tbody>'+examples.map(row=>'<tr>'+row.map(v=>`<td>${esc(v)}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
   const complete=['datetime','open','high','low','close'].every(k=>guessed[k]);
-  $('csv-status').textContent=`已使用 ${detectedEncoding.toUpperCase()} 解碼。${complete?'已自動對應中文／英文欄位；可直接執行回測。':'請完成必要欄位對應後再匯入。'}${guessed.time?'日期與時間將自動合併。':''}`;
+  $('csv-status').textContent=`已使用 ${detectedEncoding.toUpperCase()} 解碼。${complete?'已自動對應中文／英文欄位；可直接執行回測。':'請完成必要欄位對應後再匯入。'}${guessed.time?'日期與時間將自動合併。':''}${columns.some(c=>c.renamed)?'重複或空白欄名已按第幾欄區分；同名必要欄位請手動選擇。':''}`;
   $('import').disabled=false;
   }catch(error){if(generation!==csvGeneration)return;csvText='';$('mapping').hidden=true;$('mapping').replaceChildren();$('csv-preview').replaceChildren();$('import').hidden=true;$('import').disabled=true;$('csv-status').textContent=error.message;throw error;}
 }

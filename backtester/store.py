@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
-from .data import Bar, parse_csv
+from .data import Bar, CSV_PARSER_VERSION, parse_csv
 from .engine import canonical, ENGINE_VERSION
 from .strategy import validate, version_identity
 
@@ -49,7 +49,7 @@ class Store:
     def import_data(self, name, raw, mapping=None):
         mapping = mapping or {}
         bars, report = parse_csv(raw, mapping)
-        id = hashlib.sha256(raw + b'\0' + canonical(mapping).encode()).hexdigest()
+        id = hashlib.sha256(raw + b'\0' + canonical(mapping).encode() + b'\0' + CSV_PARSER_VERSION.encode()).hexdigest()
         with self.connect() as db:
             db.execute('INSERT OR IGNORE INTO datasets(id,name,raw,mapping,report,bars,first_time,last_time) VALUES (?,?,?,?,?,?,?,?)',
                        (id, name, raw, canonical(mapping), canonical(report), canonical([b.json() for b in bars]),

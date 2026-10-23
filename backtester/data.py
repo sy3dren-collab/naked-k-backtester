@@ -2,12 +2,14 @@ import csv
 import hashlib
 import io
 import re
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone, time
 
 TAIPEI = timezone(timedelta(hours=8))
 DAY_OPEN, DAY_CLOSE = time(8, 45), time(13, 45)
 TIMEFRAMES = (1, 5, 15, 30)
+CSV_PARSER_VERSION = '1.1.0'
 ALIASES = {
     'datetime': ['datetime', 'timestamp', '日期時間', '交易時間', '時間'],
     'date': ['date', '日期', '交易日期'], 'time': ['time', '時間'],
@@ -27,13 +29,32 @@ def decode_csv(raw):
         return raw.decode('cp950'), 'big5'
 
 
-def guess_mapping(headers):
+def csv_columns(headers):
+    """Keep every physical column addressable, even with blank/duplicate names."""
+    counts, reserved, used = Counter(headers), set(headers), set()
+    columns = []
+    for index, name in enumerate(headers):
+        renamed = not name.strip() or counts[name] > 1
+        key = f'{name if name.strip() else "未命名欄位"} [第 {index+1} 欄]' if renamed else name
+        if renamed:
+            while key in reserved or key in used:
+                key += '#'
+        used.add(key)
+        columns.append({'key': key, 'name': name, 'column': index+1, 'renamed': renamed})
+    return columns
+
+
+def guess_mapping(headers, original_headers=None):
     def normalized(value):
         return re.sub(r'[\s_\-()（）]', '', value).lower()
+    originals = headers if original_headers is None else original_headers
+    def matches(key):
+        return [h for h, original in zip(headers, originals) if normalized(original) in [normalized(a) for a in ALIASES[key]]]
     def find(key):
-        return next((h for h in headers if normalized(h) in [normalized(a) for a in ALIASES[key]]), '')
-    date = find('date')
-    return {'datetime': date or find('datetime'), 'time': find('time') if date else '',
+        candidates = matches(key)
+        return candidates[0] if len(candidates) == 1 else ''
+    has_date = bool(matches('date'))
+    return {'datetime': find('date') if has_date else find('datetime'), 'time': find('time') if has_date else '',
             **{key: find(key) for key in ('open', 'high', 'low', 'close', 'volume', 'contract', 'source')}}
 
 
@@ -99,7 +120,7 @@ def day_session(dt):
 def parse_csv(raw, mapping=None):
     """Validate without silently repairing duplicate/unsorted/invalid records."""
     mapping = mapping or {}
-    report = {'errors': [], 'warnings': [], 'missing_minutes': [], 'night_rows': 0,
+    report = {'parser_version': CSV_PARSER_VERSION, 'errors': [], 'warnings': [], 'missing_minutes': [], 'night_rows': 0,
               'outside_session_rows': 0, 'volume_missing_rows': 0, 'rows': 0}
     try:
         text, encoding = decode_csv(raw)
@@ -109,16 +130,21 @@ def parse_csv(raw, mapping=None):
         except csv.Error:
             dialect = csv.excel
         reader = csv.DictReader(io.StringIO(text), dialect=dialect)
-        headers = reader.fieldnames or []
+        originals = reader.fieldnames or []
+        columns = csv_columns(originals)
+        headers = [c['key'] for c in columns]
+        # DictReader must receive the unique keys before it reads any data row;
+        # otherwise Python silently overwrites the first same-named value.
+        reader.fieldnames = headers
+        report['columns'] = columns
         if not mapping:
-            mapping = guess_mapping(headers)
-        if len(set(headers)) != len(headers):
-            report['errors'].append('CSV 欄位名稱重複，請先調整欄名')
-            return [], report
+            mapping = guess_mapping(headers, originals)
+        if any(c['renamed'] for c in columns):
+            report['warnings'].append('重複或空白欄名已按原始欄位位置區分；同名必要欄位請手動對應，不需修改 CSV')
         required = ['datetime', 'open', 'high', 'low', 'close']
         absent = [k for k in required if mapping.get(k, k) not in headers]
         if absent:
-            report['errors'].append('缺少必要欄位：' + ', '.join(absent))
+            report['errors'].append('缺少或尚未對應必要欄位：' + ', '.join(absent) + '；同名欄位請依第幾欄手動選擇')
             return [], report
         if len({mapping.get(k, k) for k in required}) != len(required):
             report['errors'].append('日期與 OHLC 必須對應不同欄位')

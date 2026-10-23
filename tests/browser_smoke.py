@@ -35,8 +35,16 @@ def main():
      page.locator('[data-tab="workspace"]').click();page.locator('#template').select_option(str(i))
      if i==0:page.locator('#quantity').fill('3')
      data=fixture(i);text='日期,時間,開盤價,最高價,最低價,收盤價,成交量\r\n'+'\r\n'.join(f'{b.start.date().isoformat()},{b.start.strftime("%H:%M:%S")},{b.open},{b.high},{b.low},{b.close},100' for b in data)
+     if i==0:
+      lines=text.split('\r\n');text=lines[0]+',開盤價,,\r\n'+'\r\n'.join(line+',999,,' for line in lines[1:])
      page.locator('#csv-file').set_input_files({'name':f'人工驗收-{i}.csv','mimeType':'text/csv','buffer':text.encode('cp950')})
      page.wait_for_function("()=>!document.getElementById('import').disabled")
+     if i==0:
+      assert page.locator('[data-map="open"]').input_value()==''
+      assert '重複或空白欄名' in page.locator('#csv-status').text_content()
+      page.locator('[data-map="open"]').select_option('開盤價 [第 8 欄]')
+      page.locator('#import').click();page.wait_for_function("()=>document.getElementById('message').textContent.includes('OHLC')")
+      page.locator('[data-map="open"]').select_option('開盤價 [第 3 欄]')
      page.locator('#run').click();page.locator('#report.active #trades tr').first.wait_for()
      assert page.locator('#metrics .metric').count()==21
      with page.expect_download() as pending:page.locator('#export-result').click()

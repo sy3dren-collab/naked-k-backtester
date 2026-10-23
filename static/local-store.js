@@ -24,7 +24,7 @@
       else if(path==='import'){
         if(typeof body.csv!=='string')throw Error('CSV 必須為文字');
         progress('import');
-        const mapping=body.mapping||C.guess(C.headers(body.csv)),parsed=C.parse(body.csv,mapping),id=E.sha256(body.csv+'\0'+E.canonical(mapping));
+        const columns=C.columns(body.csv),mapping=body.mapping||C.guess(columns.map(c=>c.key),columns.map(c=>c.name)),parsed=C.parse(body.csv,mapping),id=E.sha256(body.csv+'\0'+E.canonical(mapping)+'\0'+C.PARSER_VERSION);
         parsed.report.source_encoding=mapping._source_encoding||'utf-8';
         const row={id,name:body.name||'import.csv',report:parsed.report,first:parsed.bars.length?C.iso(parsed.bars[0].start):null,last:parsed.bars.length?C.iso(parsed.bars.at(-1).start):null};
         await write([['datasets',row],['data',{id,csv:body.csv,mapping}]]);cached={id,bars:parsed.bars};value={...row,storage_mode:storageMode};

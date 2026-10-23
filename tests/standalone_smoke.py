@@ -39,6 +39,8 @@ def main():
                           (18006,18010,18000,18008,509),(18008,18012,18005,18010,940)]
                 text = '日期,時間,開盤價,最高價,最低價,收盤價,成交量\r\n' + '\r\n'.join(
                     f'2024/2/1,08:{45+i:02}:00,' + ','.join(map(str, v)) for i, v in enumerate(values))
+                lines=text.split('\r\n')
+                text=lines[0]+',備註,備註,,\r\n'+'\r\n'.join(line+',first,second,,' for line in lines[1:])
                 for encoding in ('cp950', 'utf-8-sig', 'utf-16'):
                     page.locator('#csv-file').set_input_files({'name':f'2024~2026小台一分K-{encoding}.csv',
                         'mimeType':'text/csv','buffer':text.encode(encoding)})
