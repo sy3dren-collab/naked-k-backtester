@@ -29,6 +29,12 @@ class Store:
                     FOREIGN KEY(dataset_id) REFERENCES datasets(id));
                 CREATE TABLE IF NOT EXISTS strategy_archive (
                     id TEXT NOT NULL, version TEXT NOT NULL, PRIMARY KEY(id,version));
+                CREATE TABLE IF NOT EXISTS learning_studies (
+                    id TEXT PRIMARY KEY, document TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS learning_checks (
+                    study_id TEXT NOT NULL, candidate_id TEXT NOT NULL, dataset_id TEXT NOT NULL,
+                    start TEXT NOT NULL, end TEXT NOT NULL, document TEXT NOT NULL,
+                    PRIMARY KEY(study_id,candidate_id), FOREIGN KEY(study_id) REFERENCES learning_studies(id));
             ''')
             columns = {row[1] for row in db.execute('PRAGMA table_info(datasets)')}
             for name in ('first_time', 'last_time'):
@@ -71,6 +77,11 @@ class Store:
     def datasets(self):
         with self.connect() as db:
             return [{**dict(r), 'report': json.loads(r['report'])} for r in db.execute('SELECT id,name,report,first_time AS first,last_time AS last FROM datasets ORDER BY rowid DESC')]
+
+    def dataset_name(self,id):
+        with self.connect() as db:row=db.execute('SELECT name FROM datasets WHERE id=?',(id,)).fetchone()
+        if not row:raise ValueError('找不到匯入資料')
+        return row[0]
 
     def save_strategy(self, strategy):
         validate(strategy)
@@ -154,4 +165,37 @@ class Store:
         with self.connect() as db:
             rows = db.execute('SELECT id,dataset_id,strategy_id,strategy_version,settings,result FROM runs ORDER BY rowid DESC').fetchall()
         return [{k: r[k] for k in ('id', 'dataset_id', 'strategy_id', 'strategy_version')} |
-                {'settings': json.loads(r['settings']), 'metrics': json.loads(r['result'])['metrics']} for r in rows]
+                {'settings': json.loads(r['settings']), 'metrics': {k:v for k,v in json.loads(r['result'])['metrics'].items() if k!='cumulative_pnl'}} for r in rows]
+
+    def save_learning_study(self,study):
+        with self.connect() as db:
+            db.execute('INSERT OR IGNORE INTO learning_studies VALUES (?,?)',(study['id'],canonical(study)))
+
+    def learning_study(self,id,required=True):
+        with self.connect() as db:row=db.execute('SELECT document FROM learning_studies WHERE id=?',(id,)).fetchone()
+        if row:return json.loads(row[0])
+        if required:raise ValueError('找不到研究紀錄')
+
+    def learning_studies(self):
+        with self.connect() as db:
+            rows=db.execute('SELECT id,document FROM learning_studies ORDER BY rowid DESC LIMIT 20').fetchall()
+        return [{'id':r['id'],**{k:doc[k] for k in ('recipe','config','split')}} for r in rows for doc in [json.loads(r['document'])]]
+
+    def learning_check(self,study_id,candidate_id):
+        with self.connect() as db:
+            row=db.execute('SELECT document FROM learning_checks WHERE study_id=? AND candidate_id=?',(study_id,candidate_id)).fetchone()
+        return json.loads(row[0]) if row else None
+
+    def learning_check_ids(self,study_id):
+        with self.connect() as db:
+            return [r[0] for r in db.execute('SELECT candidate_id FROM learning_checks WHERE study_id=?',(study_id,))]
+
+    def save_learning_check(self,check):
+        with self.connect() as db:
+            db.execute('INSERT OR IGNORE INTO learning_checks VALUES (?,?,?,?,?,?)',
+                       (check['study_id'],check['candidate_id'],check['dataset_id'],check['period']['start'],check['period']['end'],canonical(check)))
+
+    def learning_exposures(self,dataset_id,period):
+        with self.connect() as db:
+            return db.execute('SELECT COUNT(*) FROM learning_checks WHERE dataset_id=? AND start<=? AND end>=?',
+                              (dataset_id,period['end'],period['start'])).fetchone()[0]

@@ -1,33 +1,57 @@
 <!doctype html>
 <html lang="zh-Hant">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>裸 K Lab · 策略回測工作台</title><link rel="stylesheet" href="/style.css"></head>
-<body>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>裸 K Lab · 策略回測工作台</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/learning.css"></head>
+<body class="learning-mode">
 <aside class="sidebar">
   <a class="brand" href="/">K<span>／</span>LAB <small>裸 K 策略研究室</small></a>
   <div class="nav-label">WORKSPACE</div>
-  <nav><button class="nav active" data-tab="workspace">◫ <span>策略工作台</span><small>01</small></button><button class="nav" data-tab="report">↗ <span>回測報表</span><small>02</small></button><button class="nav" data-tab="history">≋ <span>歷史比較</span><small>03</small></button><button class="nav" data-tab="review">▥ <span>K 棒檢討</span><small>04</small></button></nav>
-  <div class="side-note"><span class="status-dot"></span> LOCAL RESEARCH<br><p>日盤 · 單商品 · 單一持倉<br>所有資料儲存於本機</p><span class="version">V1.0 · 完整版</span></div>
+  <nav><button class="nav active" data-tab="workspace">◫ <span>建立策略</span><small>01</small></button><button class="nav" data-tab="study">◇ <span>學習與比較</span><small>02</small></button><button class="nav" data-tab="report">↗ <span>回測報表</span><small>03</small></button><button class="nav" data-tab="history">≋ <span>歷史比較</span><small>04</small></button><button class="nav" data-tab="review">▥ <span>K 棒檢討</span><small>05</small></button></nav>
+  <div class="side-note"><span class="status-dot"></span> LOCAL RESEARCH<br><p>日盤 · 單商品 · 單一持倉<br>所有資料儲存於本機</p><span class="version">V1.1 · 學習版</span></div>
 </aside>
 <main>
   <header><div class="breadcrumb">研究工作區 <span>/</span> 台指期策略回測</div><span class="badge">離線運算 · TAIPEI UTC+8</span></header>
   <div id="message" role="status" aria-live="polite" hidden></div>
   <section id="workspace" class="tab active">
-    <div class="page-heading"><div><div class="eyebrow">BUILD. TEST. UNDERSTAND.</div><h1>讓交易想法，接受數據驗證<span>。</span></h1><p>從歷史行情到策略積木，建立可追溯、可重現的回測實驗。</p></div><span class="outline-tag">V1 / 日盤研究</span></div>
-    <div class="stepbar"><span><b>01</b> 匯入行情</span><i>──</i><span><b>02</b> 組合策略</span><i>──</i><span><b>03</b> 檢視績效</span></div>
-    <div class="workspace-grid">
+    <div class="page-heading"><div><div class="eyebrow">BUILD. TEST. UNDERSTAND.</div><h1>從一個想法，開始學會回測<span>。</span></h1><p>選一個交易想法，調整少量參數，先建立基準，再比較與驗證。</p></div><span class="outline-tag">1 口開始 · 日盤練習</span></div>
+    <div class="stepbar"><span><b>01</b> 匯入行情</span><i>──</i><span><b>02</b> 選交易想法</span><i>──</i><span><b>03</b> 回測與驗證</span></div>
+    <div class="mode-bar"><div class="mode-buttons" role="group" aria-label="操作模式"><button id="mode-simple" class="selected" aria-pressed="true">新手模式</button><button id="mode-advanced" aria-pressed="false">進階積木</button></div><p id="mode-hint">系統自動連接條件與停損，你只需要描述想測試的交易方式。</p></div><div class="workspace-grid">
     <div class="left-column">
       <article class="card"><div class="card-heading"><h2><span class="section-no">01</span> 歷史行情</h2><span class="muted">CSV / 1 MIN</span></div>
         <label class="upload" for="csv-file"><span class="upload-icon">↑</span><strong id="file-label">選擇台指期 1 分 K CSV</strong><small>UTF-8 / Big5 · 可分開日期、時間 · 成交量可省略</small><input id="csv-file" type="file" accept=".csv,text/csv"></label>
         <label id="encoding-field" hidden>CSV 編碼<select id="encoding"><option value="auto">自動辨識 UTF-8 / Big5 / UTF-16</option><option value="utf-8">UTF-8</option><option value="big5">Big5（繁體中文／Excel ANSI）</option><option value="utf-16le">UTF-16 LE</option><option value="utf-16be">UTF-16 BE</option></select></label><p id="csv-status" class="hint" aria-live="polite"></p>
-        <div id="mapping" hidden></div><div id="csv-preview" class="table-wrap"></div><button id="import" class="button full" hidden>檢查並匯入資料</button>
+        <details id="csv-details"><summary>查看欄位對應與前 3 筆資料</summary><div id="mapping" hidden></div><div id="csv-preview" class="table-wrap"></div></details><button id="import" class="button full" hidden>檢查並匯入資料</button>
         <div class="inline-buttons"><span class="muted">先熟悉操作？</span><button id="sample" class="text-button">載入人工示範行情 ↗</button></div>
         <label>已匯入資料<select id="dataset"><option value="">尚未匯入資料</option></select></label>
         <div id="data-report" class="data-report">選擇資料後，將顯示排序、缺棒、時段及價格檢查。</div>
         <div class="field-grid"><label>開始日期<input type="date" id="start"></label><label>結束日期<input type="date" id="end"></label></div>
       </article>
-      <article class="card"><div class="card-heading"><h2><span class="section-no">03</span> 模擬成本</h2><span class="muted">使用者設定值</span></div><p class="hint">以下為可修改的模擬參數，並非最新實際費率。</p><div id="costs" class="field-grid"></div><label>交易稅方式<select id="tax-mode"><option value="notional">成交價 × 每點價值 × 稅率（單邊）</option><option value="fixed">每口固定金額（單邊）</option></select></label></article>
+      <article class="card" id="cost-card"><details id="cost-details"><summary>費用與模擬資金 <small>展開調整</small></summary><div class="card-heading"><h2><span class="section-no">03</span> 模擬成本</h2><span class="muted">使用者設定值</span></div><p class="hint">以下為可修改的模擬參數，並非最新實際費率。</p><div id="costs" class="field-grid"></div><label>交易稅方式<select id="tax-mode"><option value="notional">成交價 × 每點價值 × 稅率（單邊）</option><option value="fixed">每口固定金額（單邊）</option></select></label></details></article>
     </div>
     <div class="right-column">
+      <article class="card" id="learning-builder">
+        <div class="card-heading"><div><div class="eyebrow">IDEA → RULES → EVIDENCE</div><h2>今天想測試哪種交易方式？</h2></div><span class="pill">不用接積木</span></div>
+        <div id="recipe-cards" class="recipe-cards" role="group" aria-label="選擇交易想法"></div>
+        <p id="recipe-lesson" class="learning-lesson"></p><details class="recipe-detail"><summary>這個想法如何判斷？</summary><ul id="recipe-detail-list"></ul></details>
+        <div class="simple-section"><h3>只調整這幾個設定</h3><div class="field-grid three">
+          <label>你的商品<select id="learn-instrument"><option value="MTX">小台 MTX · 每點 50 元</option><option value="TMF">微台 TMF · 每點 10 元</option><option value="TX">大台 TX · 每點 200 元</option></select></label>
+          <label>交易方向<select id="learn-direction"><option value="both">多空都測試</option><option value="long">只做多</option><option value="short">只做空</option></select></label>
+          <label>看幾分 K？<select id="learn-timeframe"><option value="1">1 分 K</option><option value="5">5 分 K</option><option value="15">15 分 K</option><option value="30">30 分 K</option></select></label>
+          <label id="learn-opening-label">先觀察開盤多久？<select id="learn-opening"><option value="5">5 分鐘</option><option value="10">10 分鐘</option><option value="15">15 分鐘</option><option value="30">30 分鐘</option></select></label>
+          <label>每筆停損距離（點）<input id="learn-stop" required type="number" value="30" min="1" max="2000" step="1"></label>
+          <label>怎麼出場？<select id="learn-exit"><option value="rr">固定停利倍數</option><option value="ma">收盤反向跨越 MA20</option><option value="trailing">獲利後追蹤停損</option></select></label>
+        </div><label id="learn-reward-label">停利是停損的幾倍？<select id="learn-reward"><option value="1">1 倍</option><option value="1.5">1.5 倍</option><option value="2" selected>2 倍</option><option value="3">3 倍</option></select><small>例如停損 30 點、2 倍停利，就是停利 60 點；不代表勝率或獲利保證。</small></label>
+        <p id="learn-risk-cash" class="risk-cash"></p></div>
+        <details class="simple-more"><summary>交易節奏與我的回撤範圍</summary><div class="field-grid">
+          <label>什麼時候可以進新單？<select id="learn-session"><option value="morning">早盤 08:50–10:30</option><option value="day">日盤 08:50–13:15</option></select></label>
+          <label>每天最多幾筆？<input id="learn-max-trades" required type="number" min="1" max="20" value="3"></label>
+          <label>想觀察的最大回撤範圍（元）<input id="learn-budget" required type="number" min="1" max="100000000" value="20000"><small>用來比較歷史結果，不會限制實際或盤中損失。</small></label>
+        </div></details>
+        <div class="rule-preview"><strong>這套策略實際會怎麼做？</strong><ol id="learn-rules"><li>正在整理交易規則…</li></ol><p id="learn-preview-error" role="status"></p></div>
+        <div class="learning-actions"><button id="simple-run" class="button">先跑一次基準回測 ↗</button><button id="simple-compare" class="button secondary">比較 3 種停損距離</button></div>
+        <p id="learning-status" class="hint" role="status">系統會依交易日把前約 70% 當學習期，後約 30% 保留驗證。先看學習期，再選設定驗證。</p>
+        <button id="simple-to-advanced" class="text-button">想看細節？將目前規則帶入進階積木 →</button>
+      </article>
+
       <article class="card strategy-card"><div class="card-heading"><h2><span class="section-no">02</span> 策略積木</h2><span class="pill">NO CODE</span></div>
         <label>從驗收範例開始<select id="template"></select></label>
         <div class="library-actions"><button class="text-button" id="refresh-library">重新載入策略庫</button><button class="text-button" id="clone-strategy">複製為新策略</button><button class="text-button" id="delete-strategy">從策略庫刪除</button><button class="text-button" id="validate-strategy">檢查策略</button></div><div class="field-grid three"><label>策略 ID<input id="strategy-id"></label><label>版本<input id="strategy-version"></label><label>主要週期<select id="timeframe"><option value="1">1 分 K</option><option value="5">5 分 K</option><option value="15">15 分 K</option><option value="30">30 分 K</option></select></label></div>
@@ -38,8 +62,19 @@
         <div class="action-row"><button class="text-button" id="save-strategy">儲存版本</button><button class="text-button" id="export-strategy">匯出 JSON</button><label class="text-button file-button">匯入 JSON<input id="strategy-file" type="file" accept=".json"></label><button class="button" id="run">執行回測 <span>↗</span></button></div>
       </article>
     </div></div>
+    <div class="learning-dock"><span id="quick-run-summary">開盤突破 · 停損 30 點</span><button class="button" id="quick-run">回測基準 ↗</button></div>
+  </section>
+
+  <section id="study" class="tab"><div class="page-heading"><div><div class="eyebrow">RESEARCH NOTEBOOK</div><h1>先看證據，再做下一個決定。</h1><p>比較同一想法的小幅調整，選定後再看保留期。</p></div><button id="study-back" class="button secondary">用選定設定再調整</button></div>
+    <article class="card"><label>我的研究紀錄<select id="study-library"><option value="">尚未建立研究</option></select></label><div id="study-empty" class="empty">從「建立策略」選一個交易想法，先跑一次基準回測。</div><div id="study-content" hidden>
+      <div id="study-context"></div><div class="study-steps"><span class="done">① 學習期比較</span><span>② 選一組設定</span><span>③ 保留期驗證</span></div>
+      <h2>先比較學習期</h2><p class="hint">沒有自動挑選最高獲利。先確認回撤、成本與交易樣本，再選你想理解的設定。</p><div id="candidate-cards" class="candidate-cards"></div>
+      <div id="selected-assessment" class="learning-assessment"></div><div class="learning-actions"><button id="check-holdout" class="button">選定這組，查看保留期 →</button><button id="view-training" class="button secondary">看學習期交易與 K 棒</button></div><p id="holdout-hint" class="hint"></p>
+      <div id="validation-content" hidden></div>
+    </div></article>
+    <article class="card learning-guide"><h2>每次只回答一個問題</h2><div class="guide-grid"><p><b>01 · 它有出現嗎？</b><br>沒有交易時先檢查日期、時段與型態；不要急著疊更多條件。</p><p><b>02 · 我受得了嗎？</b><br>看最大回撤與連續虧損，確認波動是否在你設定的範圍。</p><p><b>03 · 換一段還可以嗎？</b><br>保留期與滑價壓力測試都能幫助發現脆弱的結果。看過的資料不再是全新的驗證。</p></div></article>
   </section>
   <section id="report" class="tab"><div class="page-heading"><div><div class="eyebrow">PERFORMANCE / AFTER COSTS</div><h1>每筆交易，都有跡可循。</h1><p id="result-label">執行回測後，查看淨績效、資金曲線與交易原因。</p></div><button class="button secondary" id="export-result">匯出完整結果 JSON</button></div><div id="empty-report" class="card empty">尚無回測結果，請先至策略工作台執行回測。</div><div id="result-content" hidden><div id="metrics" class="metrics"></div><article class="card"><div class="card-heading"><h2>資金曲線 <span class="muted">扣除成本後淨清算值</span></h2><label>曲線<select id="curve-mode"><option value="equity">淨清算資金</option><option value="pnl">累積淨損益</option></select></label><span id="curve-range" class="muted"></span></div><svg id="chart" viewBox="0 0 1000 260" role="img" aria-label="回測資金曲線"></svg><p class="hint">回撤以每分鐘收盤淨清算值計算，不代表分鐘內最差浮虧。無虧損時獲利因子顯示「—」。</p></article><div class="report-grid"><article class="card"><h2>月度淨損益</h2><div id="monthly"></div></article><article class="card"><h2>本次回測說明</h2><ul id="assumptions"></ul></article></div><article class="card"><div class="card-heading"><h2>逐筆交易</h2><button class="text-button" id="export-trades">下載 CSV ↗</button></div><div class="table-wrap"><table><thead><tr><th># / 方向</th><th>進場時間 / 成交價</th><th>出場時間 / 成交價</th><th>費稅 / 滑價成本</th><th>淨損益</th><th>觸發原因</th></tr></thead><tbody id="trades"></tbody></table></div><div class="pagination"><button class="text-button" id="prev-trades">← 上一頁</button><span id="trade-page"></span><button class="text-button" id="next-trades">下一頁 →</button></div></article><details class="card"><summary>訊號稽核紀錄（畫面顯示前 100 筆，完整紀錄見 JSON）</summary><pre id="signals"></pre></details></div></section>
   <section id="history" class="tab"><div class="page-heading"><div><div class="eyebrow">EXPERIMENT LOG</div><h1>比較策略，累積證據。</h1><p>相同資料、策略版本與設定會產生相同回測識別碼。點選紀錄可重新檢視。</p></div><button id="refresh-history" class="button secondary">重新整理</button></div><article class="card"><p class="hint">比較時請確認資料與日期範圍相同；金額均為扣除成本後統計。</p><div class="table-wrap"><table><thead><tr><th>策略 / 版本</th><th>資料 / 日期範圍</th><th>交易次數</th><th>勝率</th><th>淨損益</th><th>獲利因子</th><th>最大回撤</th><th></th></tr></thead><tbody id="history-rows"></tbody></table></div></article></section>
   <section id="review" class="tab"><div class="page-heading"><div><div class="eyebrow">CAUSAL REPLAY</div><h1>K 棒交易檢討</h1><p>只顯示播放游標當時已完成的 K 棒與已確認的結構。</p></div></div><article class="card"><div class="review-controls"><label>週期<select id="review-tf"><option value="1">1 分 K</option><option value="5">5 分 K</option><option value="15">15 分 K</option><option value="30">30 分 K</option></select></label><label>播放至<input type="datetime-local" id="review-at"></label><button class="button secondary" id="review-load">載入</button><button class="button secondary" id="review-prev">← 前一根</button><button class="button secondary" id="review-next">下一根 →</button><button class="button" id="review-play">▶ 播放</button></div><p id="review-info" class="hint">請先執行回測，再選擇交易或載入 K 棒。</p><div class="candle-wrap"><canvas id="candles" width="1200" height="600" aria-label="黑底紅漲白跌 K 棒圖"></canvas></div><div id="review-trade"></div></article></section><footer>裸 K LAB <span>研究工具 · 歷史模擬不代表未來績效 · 無即時行情與下單功能</span></footer>
-</main><script src="/csv.js" defer></script><script src="/app.js" defer></script><script src="/advanced.js" defer></script><script src="/review.js" defer></script></body></html>
+</main><script src="/csv.js" defer></script><script src="/app.js" defer></script><script src="/advanced.js" defer></script><script src="/review.js" defer></script><script src="/learning.js" defer></script></body></html>

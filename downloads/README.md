@@ -1,11 +1,15 @@
-# Windows 本機完整版下載
+# Windows 回測學習版 V1.1 下載
 
 點開本資料夾的 `naked-k-backtester.zip`，按 **Download raw file** 下載。
+
+`naked-k-backtester-v1.1-learning.zip` 是相同內容的具名版本，方便辨識新舊檔案。
 
 完整解壓縮後，安裝 Python 3.11 以上，雙擊 `start_windows.bat`，首次會安裝固定版本套件並開啟瀏覽器。
 
 ZIP 包含完整原始碼、八套人工驗收 CSV／策略、操作與測試說明。不包含使用者資料庫、私人行情或已安裝環境。
 
+新版預設新手模式：選交易想法，調整少量參數，自動連接積木與停損。先跑基準、只比較三組學習期設定，選定後才查看保留期與滑價壓力測試。詳見 `docs/LEARNING_GUIDE.md`。
+
 已修正 CSV 重複欄名與空白尾欄造成無法匯入的問題。請更新後重新選取 CSV；同名必要欄位可依第幾欄選擇。
 
-已通過 72 項核心測試及 Chromium 操作測試；尚未在實體 Windows 電腦操作驗收。
+已通過 84 項核心測試及新舊模式的 Chromium 操作測試；尚未在實體 Windows 電腦操作驗收。

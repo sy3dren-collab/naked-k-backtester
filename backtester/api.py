@@ -14,6 +14,7 @@ from .engine import run
 from .examples import templates
 from .store import Store
 from .strategy import validate
+from .learning import RECIPES, DEFAULTS, configuration, strategy_for, rules_for, create_study, validate_candidate
 
 STATIC = Path(__file__).resolve().parents[1]/'static'
 
@@ -53,6 +54,34 @@ def create_app(db_path=None):
 
     @app.get('/api/catalog')
     def get_catalog(): return catalog()
+
+    @app.get('/api/learning/recipes')
+    def learning_recipes():return {'recipes':RECIPES,'defaults':DEFAULTS}
+
+    @app.post('/api/learning/preview')
+    def learning_preview(body:dict):
+        config=configuration(body.get('config',{}))
+        return {'config':config,'strategy':strategy_for(config),'rules':rules_for(config)}
+
+    @app.post('/api/learning/run')
+    def learning_run(body:dict):
+        return study_view(create_study(store,body['dataset_id'],body.get('config',{}),body.get('settings',{}),body.get('compare',False)))
+
+    @app.get('/api/learning/studies')
+    def learning_studies():return store.learning_studies()
+
+    @app.get('/api/learning/studies/{id}')
+    def learning_study(id:str):return study_view(store.learning_study(id))
+
+    @app.post('/api/learning/check')
+    def learning_check(body:dict):
+        if set(body)-{'study_id','candidate_id'}:raise ValueError('驗證只接受研究與候選設定，不可臨時修改參數或日期')
+        return validate_candidate(store,body['study_id'],body['candidate_id'])
+
+    def study_view(study):
+        period=study['split']['validation']
+        return {**study,'holdout_views':store.learning_exposures(study['dataset_id'],period) if period else 0,
+                'checked_candidates':store.learning_check_ids(study['id'])}
 
     @app.post('/api/validate')
     def validate_strategy(body: dict): return {'valid': True, 'ordered_ids': [b['id'] for b in validate(body['strategy'])]}

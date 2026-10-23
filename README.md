@@ -1,4 +1,4 @@
-# 裸 K Lab — 裸 K 策略積木回測系統 V1 完整版
+# 裸 K Lab — 回測學習系統 V1.1
 
 依 [開發任務](docs/DEVELOPMENT_TASK_V1.md) 實作的 Windows 本機網頁系統：Python 回測核心、獨立交易撮合模組、FastAPI、SQLite，以及不依賴外部 CDN 的策略編輯與 K 棒檢討介面。所有績效由匯入資料實際計算；內建人工行情僅供功能示範。
 
@@ -8,7 +8,19 @@
 2. 雙擊 `start_windows.bat`。首次啟動會建立 `.venv`，從套件索引安裝 `requirements.txt` 中固定版本的依賴，因此首次需要網路。
 3. 安裝成功後自動開啟本機網頁。之後啟動會重用已安裝環境，回測資料不需上傳外部服務。結束請在命令視窗按 `Ctrl+C`。
 
-專案根目錄 `index.html` 提供開啟說明。完整版有 Python / SQLite 後端，不能只開啟 `static/shell.html`。這個檔案是伺服器範本。之前交付的免安裝單檔 HTML v1.2 原始碼保留於 `legacy/standalone/`，ZIP 另附 `legacy-four-strategies.html`；它僅提供原先四套基礎策略功能，不包含本次新增的完整積木、FastAPI 與 K 棒重播。
+## 新手模式：從交易想法開始
+
+新版預設開啟新手模式，無須手動接積木。操作主線為：**匯入行情 → 選交易想法 → 跑基準 → 比較少量設定 → 選定後驗證 → 看交易與 K 棒**。
+
+- 四個可直接測試的想法：開盤突破、突破回踩、假突破反轉、趨勢回調。商品、方向、K 棒週期、停損與出場方式會生成同一套回測核心使用的完整策略。
+- 白話規則即時更新，固定判斷條件可展開查看。預設 1 口，進出場與保護停損自動連接；費用與進階設定採折疊顯示。
+- 以實際交易日將前約 70% 作為學習期、後約 30% 作為保留期。比較最多三組附近停損，只用學習期，不按最高獲利自動挑選。
+- 選定後才計算保留期及滑價壓力測試，追蹤重疊保留期的查看紀錄。回撤範圍、樣本筆數與沒有交易的原因採白話解釋。
+- 保存研究，可帶回選定設定繼續調整；也能進入逐筆報表、因果 K 棒檢討，或將當前規則交給完整進階積木編輯器。
+
+完整操作與取捨：[回測學習指南](docs/LEARNING_GUIDE.md)。畫面預覽：[新手工作台](docs/images/learning-desktop.png)／[人工行情研究比較](docs/images/learning-comparison.png)。這些是可驗證的研究起點，不是保證獲利或自動交易建議。
+
+專案根目錄 `index.html` 提供開啟說明。完整版有 Python / SQLite 後端，不能只開啟 `static/shell.html`。這個檔案是伺服器範本。免安裝舊網頁原始碼保留於 `legacy/standalone/`，ZIP 另附 `legacy/legacy-four-strategies.html`；它僅提供原先四套基礎策略，不包含新版學習模式與完整後端功能。
 
 在命令列安裝與啟動：
 
@@ -98,9 +110,12 @@ python -m unittest discover -s tests -v
 python -m pip install playwright
 python -m playwright install chromium
 python tests/browser_smoke.py
+python tests/learning_browser_smoke.py
 ```
 
 Linux 系統已有 Chromium 時，可設定 `CHROMIUM_PATH=/usr/bin/chromium`。此測試操作拖曳、版本、複製刪除、八套實際 CSV 回測、JSON 匯出、K 棒跳轉與播放、歷史比較及手機寬度。測試用暫存資料庫。
+
+新手模式測試另包含 Big5 CSV 重複欄名、三組學習期比較、選定保留期、滑價壓力、研究保存與帶回設定、簡化報表、K 棒檢討、進階接手及手機固定回測按鈕。核心測試也驗證四個想法的人工進場時間、144 種有效組合、後段價格不影響前段比較，以及驗證期參數鎖定與重複查看。
 
 舊版獨立 HTML 的保留驗證：`python tests/standalone_smoke.py`、`python tests/entry_smoke.py`；`python tests/check_browser_engine.py` 另需 Node 18 以上，只比對舊四策略的 Python／JavaScript 引擎，不代表進階引擎也有純前端版本。
 
@@ -112,9 +127,10 @@ backtester/blocks.py     已完成行情的價格／條件評估
 backtester/matching.py   獨立成交、成本及保護價
 backtester/runner.py     事件迴圈、持倉限制、稽核
 backtester/examples.py   八套驗收策略
+backtester/learning.py   新手配方、學習期比較、保留期與滑價壓力
 backtester/api.py        FastAPI 與不洩漏未來的重播查詢
 backtester/store.py      SQLite／版本歷史
-static/                  編輯器、報表與 Canvas K 棒圖
+static/                  新手工作台、進階編輯器、報表與 K 棒圖
 legacy/standalone/       舊版免安裝網頁來源
 ```
 

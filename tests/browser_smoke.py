@@ -17,6 +17,7 @@ def main():
     browser=p.chromium.launch(**options);page=browser.new_page(accept_downloads=True,viewport={'width':1500,'height':1100})
     errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.goto(f'http://127.0.0.1:{server.server_port}')
+    page.locator('#mode-advanced').click()
     page.locator('#tool-list [data-kind="pinbar"]').wait_for()
     page.locator('#blocks .graph-block').nth(3).wait_for()
     assert page.locator('#tool-list [data-kind]').count()>=65

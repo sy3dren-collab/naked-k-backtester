@@ -2,9 +2,9 @@
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>裸 K Lab · 開啟說明</title></head>
 <body><style>
 *{box-sizing:border-box}body{margin:0;background:#f2f4ef;color:#18362e;font:16px/1.8 system-ui,"Microsoft JhengHei",sans-serif}main{max-width:760px;margin:7vh auto;padding:36px;background:white;border:1px solid #d6ddd3;border-radius:16px}h1{line-height:1.35;font-size:32px}small{color:#5e746a}li{margin:14px 0}code{background:#eef3ef;padding:3px 7px;border-radius:4px}a{color:#14604b}.note{padding:18px;background:#f5f2e8;border-radius:8px}@media(max-width:600px){main{margin:16px;padding:24px}h1{font-size:26px}}
-</style><main><small>裸 K LAB · WINDOWS 本機完整版 V1.0</small><h1>下載後，從啟動檔開啟回測工作台。</h1>
+</style><main><small>裸 K LAB · WINDOWS 本機回測學習版 V1.1</small><h1>下載後，從啟動檔開啟回測工作台。</h1>
 <ol><li>將 ZIP <strong>完整解壓縮</strong>到電腦中的資料夾。</li><li>安裝 <a href="https://www.python.org/downloads/windows/">Python 3.11 或以上</a>。</li><li>雙擊同資料夾的 <code>start_windows.bat</code>。首次會自動安裝所需套件，請保持網路連線。</li><li>瀏覽器將自動開啟工作台。服務啟動後，也可開啟 <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>。</li></ol>
 <p class="note">這是開啟說明頁。完整版需由本機 Python 服務執行，直接開啟 HTML 不會啟動服務。命令視窗請保持開啟；結束時按 Ctrl+C。</p>
-<p>工作台提供中文 CSV／Big5 匯入、1／5／15／30 分 K、策略積木與版本、成本及績效、K 棒逐根檢討。先選擇驗收策略，再匯入 <code>examples/acceptance/</code> 中相同名稱的人工行情，即可檢查操作。</p>
-<p><a href="README.md">完整使用說明</a> · <a href="docs/IMPLEMENTATION.md">積木規則與驗證範圍</a></p><small>人工行情用於功能驗收，不能代表真實投資績效。Windows 啟動腳本已提供；目前自動化驗證平台為 Linux／Chromium。</small>
+<p>新版預設使用新手模式：匯入 CSV → 選一個交易想法 → 先跑基準 → 比較三組設定 → 選定後驗證保留期。系統自動連接積木與停損，並保留進階編輯器、逐筆報表與 K 棒檢討。第一次可按「載入人工示範行情」熟悉操作。</p>
+<p><a href="docs/LEARNING_GUIDE.md">新手操作指南</a> · <a href="README.md">完整使用說明</a> · <a href="docs/IMPLEMENTATION.md">積木規則與驗證範圍</a></p><small>人工行情用於功能驗收，不能代表真實投資績效。Windows 啟動腳本已提供；目前自動化驗證平台為 Linux／Chromium。</small>
 </main></body></html>
