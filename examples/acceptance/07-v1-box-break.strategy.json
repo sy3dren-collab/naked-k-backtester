@@ -1,0 +1,119 @@
+{
+  "schema_version": 2,
+  "strategy_id": "v1-box-break",
+  "version": "1.0",
+  "name": "盤整箱體突破進場",
+  "instrument": "TX",
+  "timeframe": 1,
+  "direction": "both",
+  "quantity": 1,
+  "blocks": [
+    {
+      "id": "box",
+      "type": "box",
+      "name": "盤整箱體",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "period": 10,
+        "min_width": 0,
+        "max_width": 30,
+        "hold": 3,
+        "tolerance": 2
+      }
+    },
+    {
+      "id": "long",
+      "type": "box_break",
+      "name": "箱體突破",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "box",
+        "direction": "up",
+        "mode": "close",
+        "wait_retest": false,
+        "within": 10,
+        "tolerance": 2
+      }
+    },
+    {
+      "id": "short",
+      "type": "box_break",
+      "name": "箱體突破",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "box",
+        "direction": "down",
+        "mode": "close",
+        "wait_retest": false,
+        "within": 10,
+        "tolerance": 2
+      }
+    },
+    {
+      "id": "stop",
+      "type": "stop_range",
+      "name": "區間邊界停損",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "source": "box",
+        "buffer": 1
+      }
+    }
+  ],
+  "entries": {
+    "long": "long",
+    "short": "short"
+  },
+  "exits": {
+    "long": [],
+    "short": []
+  },
+  "risk": {
+    "long": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    },
+    "short": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    }
+  },
+  "limits": {
+    "entry_start": "08:50",
+    "entry_end": "13:40",
+    "force_close": "13:45",
+    "max_trades_per_day": 10,
+    "daily_max_loss": 0,
+    "cooldown_bars": 0,
+    "excluded_weekdays": [],
+    "excluded_dates": [],
+    "max_stop_distance": 0,
+    "min_space": 0
+  },
+  "execution": {
+    "entry": "next_open",
+    "collision": "stop_first",
+    "valid_bars": 3
+  },
+  "costs": {
+    "point_value": 10,
+    "commission": 1,
+    "tax_mode": "fixed",
+    "tax_rate": 2e-05,
+    "tax_fixed": 0.5,
+    "slippage": 1,
+    "initial_capital": 1000000
+  }
+}

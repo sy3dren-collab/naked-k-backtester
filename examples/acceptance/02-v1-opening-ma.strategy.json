@@ -1,0 +1,136 @@
+{
+  "schema_version": 2,
+  "strategy_id": "v1-opening-ma",
+  "version": "1.0",
+  "name": "開盤 5 分突破＋MA20 出場",
+  "instrument": "TX",
+  "timeframe": 1,
+  "direction": "both",
+  "quantity": 1,
+  "blocks": [
+    {
+      "id": "range",
+      "type": "opening_range",
+      "name": "開盤區間",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "minutes": 5,
+        "session_open": "08:45",
+        "field": "high"
+      }
+    },
+    {
+      "id": "long",
+      "type": "breakout",
+      "name": "價格突破",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "range",
+        "field": "high",
+        "direction": "up",
+        "mode": "close",
+        "min_break": 0,
+        "confirm": 1,
+        "occurrence": 0,
+        "max_chase": 0
+      }
+    },
+    {
+      "id": "short",
+      "type": "breakout",
+      "name": "價格突破",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "range",
+        "field": "low",
+        "direction": "down",
+        "mode": "close",
+        "min_break": 0,
+        "confirm": 1,
+        "occurrence": 0,
+        "max_chase": 0
+      }
+    },
+    {
+      "id": "stop",
+      "type": "stop_fixed",
+      "name": "固定點數停損",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "points": 30
+      }
+    },
+    {
+      "id": "ma-exit",
+      "type": "exit_ma",
+      "name": "移動平均出場",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "period": 20,
+        "mode": "close"
+      }
+    }
+  ],
+  "entries": {
+    "long": "long",
+    "short": "short"
+  },
+  "exits": {
+    "long": [
+      "ma-exit"
+    ],
+    "short": [
+      "ma-exit"
+    ]
+  },
+  "risk": {
+    "long": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    },
+    "short": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    }
+  },
+  "limits": {
+    "entry_start": "08:50",
+    "entry_end": "13:40",
+    "force_close": "13:45",
+    "max_trades_per_day": 10,
+    "daily_max_loss": 0,
+    "cooldown_bars": 0,
+    "excluded_weekdays": [],
+    "excluded_dates": [],
+    "max_stop_distance": 0,
+    "min_space": 0
+  },
+  "execution": {
+    "entry": "next_open",
+    "collision": "stop_first",
+    "valid_bars": 3
+  },
+  "costs": {
+    "point_value": 10,
+    "commission": 1,
+    "tax_mode": "fixed",
+    "tax_rate": 2e-05,
+    "tax_fixed": 0.5,
+    "slippage": 1,
+    "initial_capital": 1000000
+  }
+}

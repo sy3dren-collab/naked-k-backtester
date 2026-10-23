@@ -1,0 +1,176 @@
+{
+  "schema_version": 2,
+  "strategy_id": "v1-hh-hl",
+  "version": "1.0",
+  "name": "HH／HL 回調進場＋結構停損",
+  "instrument": "TX",
+  "timeframe": 1,
+  "direction": "both",
+  "quantity": 1,
+  "blocks": [
+    {
+      "id": "swing",
+      "type": "swing",
+      "name": "已確認波段高低點",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "left": 2,
+        "right": 2,
+        "basis": "wick",
+        "side": "both",
+        "min_turn": 0,
+        "ties": "strict"
+      }
+    },
+    {
+      "id": "long-n",
+      "type": "n_pattern",
+      "name": "N 字順勢回調",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "swing",
+        "direction": "up",
+        "min_push": 10,
+        "min_retrace": 0.2,
+        "max_retrace": 0.8,
+        "max_pullback": 20,
+        "min_break": 0
+      }
+    },
+    {
+      "id": "short-n",
+      "type": "n_pattern",
+      "name": "N 字順勢回調",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "swing",
+        "direction": "down",
+        "min_push": 10,
+        "min_retrace": 0.2,
+        "max_retrace": 0.8,
+        "max_pullback": 20,
+        "min_break": 0
+      }
+    },
+    {
+      "id": "long-trend",
+      "type": "trend_filter",
+      "name": "HH/HL 或 LH/LL 趨勢",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "swing",
+        "direction": "up"
+      }
+    },
+    {
+      "id": "short-trend",
+      "type": "trend_filter",
+      "name": "HH/HL 或 LH/LL 趨勢",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "swing",
+        "direction": "down"
+      }
+    },
+    {
+      "id": "long",
+      "type": "and",
+      "name": "AND 全部成立",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "inputs": [
+          "long-n",
+          "long-trend"
+        ]
+      }
+    },
+    {
+      "id": "short",
+      "type": "and",
+      "name": "AND 全部成立",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "inputs": [
+          "short-n",
+          "short-trend"
+        ]
+      }
+    },
+    {
+      "id": "stop",
+      "type": "stop_structure",
+      "name": "波段結構停損",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "source": "swing",
+        "buffer": 1,
+        "maximum": 0,
+        "mode": "swing"
+      }
+    }
+  ],
+  "entries": {
+    "long": "long",
+    "short": "short"
+  },
+  "exits": {
+    "long": [],
+    "short": []
+  },
+  "risk": {
+    "long": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    },
+    "short": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    }
+  },
+  "limits": {
+    "entry_start": "08:50",
+    "entry_end": "13:40",
+    "force_close": "13:45",
+    "max_trades_per_day": 10,
+    "daily_max_loss": 0,
+    "cooldown_bars": 0,
+    "excluded_weekdays": [],
+    "excluded_dates": [],
+    "max_stop_distance": 0,
+    "min_space": 0
+  },
+  "execution": {
+    "entry": "next_open",
+    "collision": "stop_first",
+    "valid_bars": 3
+  },
+  "costs": {
+    "point_value": 10,
+    "commission": 1,
+    "tax_mode": "fixed",
+    "tax_rate": 2e-05,
+    "tax_fixed": 0.5,
+    "slippage": 1,
+    "initial_capital": 1000000
+  }
+}

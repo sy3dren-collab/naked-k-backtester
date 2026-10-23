@@ -1,0 +1,74 @@
+[
+  {
+    "fixture": "01-v1-opening-fixed",
+    "trade_count": 1,
+    "entry_time": "2024-02-01T08:51:00+08:00",
+    "entry_price": 107,
+    "exit_price": 107,
+    "cost": 3,
+    "net_pnl": -3
+  },
+  {
+    "fixture": "02-v1-opening-ma",
+    "trade_count": 1,
+    "entry_time": "2024-02-01T09:06:00+08:00",
+    "entry_price": 106,
+    "exit_price": 94,
+    "cost": 3,
+    "net_pnl": -123
+  },
+  {
+    "fixture": "03-v1-hh-hl",
+    "trade_count": 1,
+    "entry_time": "2024-02-01T09:03:00+08:00",
+    "entry_price": 124,
+    "exit_price": 122,
+    "cost": 3,
+    "net_pnl": -23
+  },
+  {
+    "fixture": "04-v1-support-bounce",
+    "trade_count": 1,
+    "entry_time": "2024-02-01T08:52:00+08:00",
+    "entry_price": 99,
+    "exit_price": 99,
+    "cost": 3,
+    "net_pnl": -3
+  },
+  {
+    "fixture": "05-v1-break-retest",
+    "trade_count": 1,
+    "entry_time": "2024-02-01T09:09:00+08:00",
+    "entry_price": 105,
+    "exit_price": 103,
+    "cost": 3,
+    "net_pnl": -23
+  },
+  {
+    "fixture": "06-v1-false-break",
+    "trade_count": 1,
+    "entry_time": "2024-02-01T08:51:00+08:00",
+    "entry_price": 98,
+    "exit_price": 98,
+    "cost": 3,
+    "net_pnl": -3
+  },
+  {
+    "fixture": "07-v1-box-break",
+    "trade_count": 1,
+    "entry_time": "2024-02-01T08:58:00+08:00",
+    "entry_price": 107,
+    "exit_price": 106,
+    "cost": 3,
+    "net_pnl": -13
+  },
+  {
+    "fixture": "08-v1-swing-trailing",
+    "trade_count": 1,
+    "entry_time": "2024-02-01T08:56:00+08:00",
+    "entry_price": 121,
+    "exit_price": 109,
+    "cost": 3,
+    "net_pnl": -123
+  }
+]

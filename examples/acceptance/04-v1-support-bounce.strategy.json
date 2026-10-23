@@ -1,0 +1,105 @@
+{
+  "schema_version": 2,
+  "strategy_id": "v1-support-bounce",
+  "version": "1.0",
+  "name": "支撐反彈＋確認 K 進場",
+  "instrument": "TX",
+  "timeframe": 1,
+  "direction": "both",
+  "quantity": 1,
+  "blocks": [
+    {
+      "id": "support",
+      "type": "swing",
+      "name": "已確認波段高低點",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "left": 2,
+        "right": 2,
+        "basis": "wick",
+        "side": "low",
+        "min_turn": 0,
+        "ties": "strict"
+      }
+    },
+    {
+      "id": "long",
+      "type": "bounce",
+      "name": "支撐反彈",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "support",
+        "direction": "up",
+        "tolerance": 2,
+        "wick_ratio": 0.4,
+        "reaction": 3,
+        "confirm_break": true,
+        "within": 5
+      }
+    },
+    {
+      "id": "stop",
+      "type": "stop_zone",
+      "name": "支撐壓力停損",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "source": "support",
+        "buffer": 2
+      }
+    }
+  ],
+  "entries": {
+    "long": "long",
+    "short": null
+  },
+  "exits": {
+    "long": [],
+    "short": []
+  },
+  "risk": {
+    "long": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    },
+    "short": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    }
+  },
+  "limits": {
+    "entry_start": "08:50",
+    "entry_end": "13:40",
+    "force_close": "13:45",
+    "max_trades_per_day": 10,
+    "daily_max_loss": 0,
+    "cooldown_bars": 0,
+    "excluded_weekdays": [],
+    "excluded_dates": [],
+    "max_stop_distance": 0,
+    "min_space": 0
+  },
+  "execution": {
+    "entry": "next_open",
+    "collision": "stop_first",
+    "valid_bars": 3
+  },
+  "costs": {
+    "point_value": 10,
+    "commission": 1,
+    "tax_mode": "fixed",
+    "tax_rate": 2e-05,
+    "tax_fixed": 0.5,
+    "slippage": 1,
+    "initial_capital": 1000000
+  }
+}
