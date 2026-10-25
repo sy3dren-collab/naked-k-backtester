@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from .catalog import catalog
 from .data import aggregate, TIMEFRAMES
 from .engine import run
+from .runner import ENGINE_VERSION
 from .examples import templates
 from .store import Store
 from .strategy import validate
@@ -21,7 +22,7 @@ STATIC = Path(__file__).resolve().parents[1]/'static'
 
 def create_app(db_path=None):
     store = Store(db_path or STATIC.parent/'data'/'backtester.sqlite3')
-    app = FastAPI(title='裸 K Lab', version='2.0.0')
+    app = FastAPI(title='裸 K Lab', version=ENGINE_VERSION)
     app.state.store = store
 
     @app.middleware('http')
@@ -47,7 +48,7 @@ def create_app(db_path=None):
     for error in (ValueError, KeyError, TypeError, RequestValidationError): app.add_exception_handler(error, bad_input)
 
     @app.get('/api/health')
-    def health(): return {'status': 'ok', 'engine': '2.0.0', 'service': 'FastAPI'}
+    def health(): return {'status': 'ok', 'engine': ENGINE_VERSION, 'service': 'FastAPI'}
 
     @app.get('/api/templates')
     def get_templates(): return templates()

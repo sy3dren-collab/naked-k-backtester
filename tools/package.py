@@ -16,7 +16,7 @@ def package(output):
     files = [ROOT/name for name in ('README.md','index.html','start_windows.bat','.gitignore','requirements.txt','requirements-dev.txt')]
     for directory in ('backtester','static','tests','tools','docs','examples','legacy','.github'):
         files.extend(p for p in (ROOT/directory).rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix != '.pyc')
-    archive = output/'naked-k-backtester-v1.1-learning.zip'
+    archive = output/'naked-k-backtester-v1.2-multitimeframe.zip'
     with tempfile.TemporaryDirectory() as directory:
         legacy = build_legacy(Path(directory))
         with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED) as z:

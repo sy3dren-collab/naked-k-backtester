@@ -30,7 +30,7 @@ def validate(strategy):
     if not isinstance(strategy['strategy_id'], str) or not strategy['strategy_id'] or not str(strategy['version']):
         raise ValueError('策略 ID 與版本不可空白')
     if strategy['timeframe'] not in TIMEFRAMES:
-        raise ValueError('週期須為 1／5／15／30 分 K')
+        raise ValueError('週期須為 1／5／15／30／60 分 K')
     if strategy.get('direction', 'both') not in ('both', 'long', 'short'):
         raise ValueError('交易方向須為 long／short／both')
     if type(strategy.get('quantity', 1)) is not int or not 1 <= strategy.get('quantity', 1) <= 100:

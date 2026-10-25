@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 from backtester.api import create_app
-from backtester.data import Bar
+from backtester.data import Bar, TIMEFRAMES
 from backtester.learning import RECIPES, configuration, strategy_for, rules_for, split_period, create_study, validate_candidate
 from backtester.schema import validate
 from backtester.store import Store
@@ -30,7 +30,7 @@ class RecipeTests(unittest.TestCase):
     def test_all_recipe_exit_timeframe_combinations_have_valid_bound_protection(self):
         for r in RECIPES:
             for exit in ('rr','ma','trailing'):
-                for tf in (1,5,15,30):
+                for tf in TIMEFRAMES:
                     for side in ('long','short','both'):
                         with self.subTest(recipe=r['id'],exit=exit,tf=tf,side=side):
                             s=strategy_for({'recipe':r['id'],'exit':exit,'timeframe':tf,'direction':side})

@@ -10,7 +10,7 @@ from .engine import canonical, metrics
 from .matching import Broker
 from .schema import validate, references
 
-ENGINE_VERSION = '2.0.0'
+ENGINE_VERSION = '2.1.0'
 
 
 def roots(value):

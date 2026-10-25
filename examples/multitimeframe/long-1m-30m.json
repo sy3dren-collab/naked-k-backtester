@@ -1,0 +1,157 @@
+{
+  "schema_version": 2,
+  "strategy_id": "mtf-cd736e8c43b89b2cfecd",
+  "version": "1.0",
+  "name": "1分K順勢結構突破＋30分多頭過濾",
+  "instrument": "MTX",
+  "timeframe": 1,
+  "direction": "long",
+  "quantity": 1,
+  "blocks": [
+    {
+      "id": "local",
+      "type": "swing",
+      "name": "已確認波段高低點",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "left": 2,
+        "right": 2,
+        "basis": "wick",
+        "side": "both",
+        "min_turn": 10,
+        "ties": "strict"
+      }
+    },
+    {
+      "id": "entry-signal",
+      "type": "bos",
+      "name": "結構突破 BOS",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "local",
+        "direction": "up",
+        "min_break": 1,
+        "mode": "close",
+        "require_trend": true
+      }
+    },
+    {
+      "id": "macro-structure",
+      "type": "swing",
+      "name": "已確認波段高低點",
+      "enabled": true,
+      "timeframe": 30,
+      "output": "PriceLevel",
+      "params": {
+        "left": 2,
+        "right": 1,
+        "basis": "wick",
+        "side": "both",
+        "min_turn": 20,
+        "ties": "strict"
+      }
+    },
+    {
+      "id": "macro-bull",
+      "type": "trend_filter",
+      "name": "HH/HL 或 LH/LL 趨勢",
+      "enabled": true,
+      "timeframe": 30,
+      "output": "Condition",
+      "params": {
+        "source": "macro-structure",
+        "direction": "up"
+      }
+    },
+    {
+      "id": "entry",
+      "type": "and",
+      "name": "AND 全部成立",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "inputs": [
+          "entry-signal",
+          "macro-bull"
+        ]
+      }
+    },
+    {
+      "id": "local-break",
+      "type": "exit_structure",
+      "name": "結構失效出場",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "Condition",
+      "params": {
+        "source": "local"
+      }
+    },
+    {
+      "id": "stop",
+      "type": "stop_fixed",
+      "name": "固定點數停損",
+      "enabled": true,
+      "timeframe": 1,
+      "output": "PriceLevel",
+      "params": {
+        "points": 90
+      }
+    }
+  ],
+  "entries": {
+    "long": "entry",
+    "short": null
+  },
+  "exits": {
+    "long": [
+      "local-break"
+    ],
+    "short": []
+  },
+  "risk": {
+    "long": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    },
+    "short": {
+      "stop_blocks": [
+        "stop"
+      ],
+      "target_blocks": []
+    }
+  },
+  "limits": {
+    "entry_start": "09:15",
+    "entry_end": "13:15",
+    "force_close": "13:40",
+    "max_trades_per_day": 3,
+    "daily_max_loss": 0,
+    "cooldown_bars": 3,
+    "excluded_weekdays": [],
+    "excluded_dates": [],
+    "max_stop_distance": 0,
+    "min_space": 0
+  },
+  "execution": {
+    "entry": "next_open",
+    "collision": "stop_first",
+    "valid_bars": 3
+  },
+  "costs": {
+    "point_value": 50,
+    "commission": 50,
+    "tax_mode": "notional",
+    "tax_rate": 2e-05,
+    "tax_fixed": 0,
+    "slippage": 1,
+    "initial_capital": 1000000
+  }
+}

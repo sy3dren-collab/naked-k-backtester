@@ -5,7 +5,7 @@ import math
 from datetime import date
 
 from .catalog import make_block
-from .data import day_session
+from .data import day_session, TIMEFRAMES
 from .engine import canonical, run
 from .examples import base
 from .schema import validate
@@ -34,7 +34,7 @@ def configuration(value):
     if set(value)-allowed:raise ValueError('含有不支援的簡易設定')
     c={**DEFAULTS,**copy.deepcopy(value)}
     choices={'recipe':[r['id'] for r in RECIPES],'instrument':['TX','MTX','TMF'],'direction':['long','short','both'],
-             'timeframe':[1,5,15,30],'opening_minutes':[5,10,15,30],'exit':['rr','ma','trailing'],'session':['morning','day']}
+             'timeframe':TIMEFRAMES,'opening_minutes':[5,10,15,30],'exit':['rr','ma','trailing'],'session':['morning','day']}
     for key,options in choices.items():
         if c[key] not in options or (key in ('timeframe','opening_minutes') and type(c[key]) is not int):raise ValueError('設定選項不合法：'+key)
     for key,low,high in [('stop_points',1,2000),('reward_r',.5,5),('max_trades',1,20),('drawdown_budget',1,100000000)]:

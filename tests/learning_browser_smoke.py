@@ -69,6 +69,17 @@ def main():
                 assert strategy['instrument']=='MTX' and strategy['costs']['point_value']==50
                 assert next(b for b in strategy['blocks'] if b['type']=='stop_fixed')['params']['points']==41
                 assert strategy['risk']['long']['stop_blocks']==['stop']
+                page.locator('#blocks .graph-block[data-id="exit"]').click()
+                page.locator('#inspector [data-tf]').select_option('60')
+                with page.expect_response(lambda response:response.url.endswith('/api/validate')) as validation:
+                    page.locator('#validate-strategy').click()
+                assert validation.value.status==200
+                with page.expect_download() as hourly:page.locator('#export-strategy').click()
+                exported=json.loads(Path(hourly.value.path()).read_text())
+                assert next(b for b in exported['blocks'] if b['id']=='exit')['timeframe']==60
+                assert exported['timeframe']==1
+                assert page.locator('#learn-timeframe option[value="60"]').count()==1
+                assert page.locator('#review-tf option[value="60"]').count()==1
                 page.locator('#mode-simple').click();page.set_viewport_size({'width':390,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 assert not errors,errors
                 browser.close();print('PASS: default beginner mode, plain rules, real Big5 CSV with repeated headers, 3 training-only variants, selected holdout, cost stress, saved research, 6-metric report, candle review, advanced handoff and mobile layout')

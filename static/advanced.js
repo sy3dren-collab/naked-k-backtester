@@ -59,7 +59,7 @@ renderBlocks=function(){
 function renderInspector(){
   const block=strategy.blocks.find(b=>b.id===selectedBlock);if(!block){$('inspector').textContent='選擇積木以編輯參數。';return;}
   const d=definition(block.type);if(!d){$('inspector').textContent='此積木無法辨識，請檢查 JSON。';return;}
-  let html=`<h3>${esc(d.code)} ${esc(d.name)}</h3><label>顯示名稱<input data-name value="${esc(block.name)}"></label><label>週期<select data-tf ${['stop','target'].includes(d.category)?'disabled':''}>${[1,5,15,30].map(tf=>option(tf,tf+' 分 K',block.timeframe)).join('')}</select></label>`;
+  let html=`<h3>${esc(d.code)} ${esc(d.name)}</h3><label>顯示名稱<input data-name value="${esc(block.name)}"></label><label>週期<select data-tf ${['stop','target'].includes(d.category)?'disabled':''}>${[1,5,15,30,60].map(tf=>option(tf,tf+' 分 K',block.timeframe)).join('')}</select></label>`;
   for(const [key,spec]of Object.entries(d.params)){
     const value=block.params[key]??spec.default;
     if(spec.type==='condition_refs'){

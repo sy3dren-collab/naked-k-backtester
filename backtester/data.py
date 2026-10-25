@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone, time
 
 TAIPEI = timezone(timedelta(hours=8))
 DAY_OPEN, DAY_CLOSE = time(8, 45), time(13, 45)
-TIMEFRAMES = (1, 5, 15, 30)
+TIMEFRAMES = (1, 5, 15, 30, 60)
 CSV_PARSER_VERSION = '1.1.0'
 ALIASES = {
     'datetime': ['datetime', 'timestamp', '日期時間', '交易時間', '時間'],
@@ -216,7 +216,7 @@ def parse_csv(raw, mapping=None):
 
 def aggregate(bars, minutes):
     if minutes not in TIMEFRAMES:
-        raise ValueError('只支援 1、5、15、30 分 K')
+        raise ValueError('只支援 1、5、15、30、60 分 K')
     groups = {}
     for b in bars:
         if not day_session(b.start):

@@ -1,8 +1,8 @@
-# Windows 回測學習版 V1.1 下載
+# Windows 回測學習版 V1.2 下載
 
 點開本資料夾的 `naked-k-backtester.zip`，按 **Download raw file** 下載。
 
-`naked-k-backtester-v1.1-learning.zip` 是相同內容的具名版本，方便辨識新舊檔案。
+`naked-k-backtester-v1.2-multitimeframe.zip` 是相同內容的具名版本，新增 60 分 K 與多週期操作範例。先前 V1.1 具名檔保留供辨識版本。
 
 完整解壓縮後，安裝 Python 3.11 以上，雙擊 `start_windows.bat`，首次會安裝固定版本套件並開啟瀏覽器。
 
@@ -12,4 +12,6 @@ ZIP 包含完整原始碼、八套人工驗收 CSV／策略、操作與測試說
 
 已修正 CSV 重複欄名與空白尾欄造成無法匯入的問題。請更新後重新選取 CSV；同名必要欄位可依第幾欄選擇。
 
-已通過 84 項核心測試及新舊模式的 Chromium 操作測試；尚未在實體 Windows 電腦操作驗收。
+支援 30／60 分 K 看方向、1 分 K 進出場；各積木可獨立選週期。詳見 `docs/MULTITIMEFRAME_GUIDE.md`。
+
+已通過 89 項核心測試及新舊模式的 Chromium 操作測試；尚未在實體 Windows 電腦操作驗收。
